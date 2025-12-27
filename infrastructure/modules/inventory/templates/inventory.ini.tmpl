@@ -1,0 +1,24 @@
+[all]
+%{ for name, n in cps ~}
+${name} ansible_host=${n.ip} ip=${n.ip}
+%{ endfor ~}
+
+%{ for name, n in workers ~}
+${name} ansible_host=${n.ip} ip=${n.ip}
+%{ endfor ~}
+
+[kube_control_plane]
+%{ for name, _ in cps ~}${name}
+%{ endfor ~}
+
+[kube_node]
+%{ for name, _ in workers ~}${name}
+%{ endfor ~}
+
+[etcd]
+%{ for name, _ in cps ~}${name}
+%{ endfor ~}
+
+[k8s_cluster:children]
+kube_control_plane
+kube_node
