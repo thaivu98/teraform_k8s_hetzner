@@ -7,16 +7,30 @@ ${name} ansible_host=${n.ip} ip=${n.ip}
 ${name} ansible_host=${n.ip} ip=${n.ip}
 %{ endfor ~}
 
+%{ for group_name, group in node_groups ~}
+%{ for name, n in group.hosts ~}
+${name} ansible_host=${n.ip} ip=${n.ip} node_labels='{${join(", ", [for k, v in group.labels : "\"${k}\": \"${v}\""])}}' node_taints='[${join(", ", [for t in group.taints : "\"${t}\""])}]'
+%{ endfor ~}
+%{ endfor ~}
+
 [kube_control_plane]
-%{ for name, _ in cps ~}${name}
+%{ for name, _ in cps ~}
+${name}
 %{ endfor ~}
 
 [kube_node]
-%{ for name, _ in workers ~}${name}
+%{ for name, _ in workers ~}
+${name}
+%{ endfor ~}
+%{ for group_name, group in node_groups ~}
+%{ for name, _ in group.hosts ~}
+${name}
+%{ endfor ~}
 %{ endfor ~}
 
 [etcd]
-%{ for name, _ in cps ~}${name}
+%{ for name, _ in cps ~}
+${name}
 %{ endfor ~}
 
 [k8s_cluster:children]
